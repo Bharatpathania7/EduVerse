@@ -4,15 +4,15 @@ import lombok.Data;
 
 @Data
 public class UserLoginRequest {
-    private String email;
+    private String identifier;
     private String password;
 
     public String getEmail() {
-        return email;
+        return identifier;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.identifier = email;
     }
 
     public String getPassword() {
