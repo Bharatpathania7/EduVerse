@@ -7,11 +7,11 @@ public class UserLoginRequest {
     private String identifier;
     private String password;
 
-    public String getEmail() {
+    public String getIdentifier() {
         return identifier;
     }
 
-    public void setEmail(String email) {
+    public void setIdentifier(String email) {
         this.identifier = email;
     }
 

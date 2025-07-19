@@ -13,7 +13,15 @@ public class Teacher {
     private String email;
     private String role;
     private String subject;
+    private String Password;
 
+    public String getPassword() {
+        return Password;
+    }
+
+    public void setPassword(String password) {
+        Password = password;
+    }
 
     public String getId() {
         return id;
