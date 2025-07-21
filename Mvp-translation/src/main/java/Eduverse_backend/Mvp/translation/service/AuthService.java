@@ -56,8 +56,8 @@ public class AuthService {
                 .orElseGet(() -> teacherRepository.findByteacherId(id).orElse(null));
         if (teacher != null) {
             System.out.println("Found teacher: " + teacher.getEmail());
-            if (teacher.getPassword().equals(password)) {
-                teacher.setPassword(null);
+            if (teacher.getpassword().equals(password)) {
+                teacher.setpassword(null);
                 return teacher;
             } else {
                 System.out.println("Password mismatch for teacher");
