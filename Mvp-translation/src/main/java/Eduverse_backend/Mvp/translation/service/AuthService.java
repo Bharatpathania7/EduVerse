@@ -1,86 +1,46 @@
 package Eduverse_backend.Mvp.translation.service;
 
-
 import Eduverse_backend.Mvp.translation.dto.UserLoginRequest;
-import Eduverse_backend.Mvp.translation.model.Student;
 import Eduverse_backend.Mvp.translation.model.Teacher;
-import Eduverse_backend.Mvp.translation.repository.StudentRepository;
+import Eduverse_backend.Mvp.translation.model.Student;
 import Eduverse_backend.Mvp.translation.repository.TeacherRepository;
+import Eduverse_backend.Mvp.translation.repository.StudentRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
     @Autowired
     private TeacherRepository teacherRepository;
 
     @Autowired
     private StudentRepository studentRepository;
+
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private JwtService jwtService;
 
-//    public Object Login(UserLoginRequest request) {
-//        String id = request.getIdentifier();
-//        String password = request.getPassword();
-//
-// // teacher check
-//        Teacher teacher = teacherRepository.findByEmail(id)
-//                .orElseGet(() -> teacherRepository.findByteacherId(id).orElse(null));
-//          if(teacher!= null && teacher.getPassword().equals(password)){
-//              teacher.setPassword(null);
-//             return teacher;
-//          }
-
-    /// / student check
-//
-//        Student student = studentRepository.findByEmail(id)
-//                .orElseGet(() -> studentRepository.findBystudentGuid(id).orElse(null));
-//        if (student != null && student.getPassword().equals(password)) {
-//             student.setPassword(null);
-//              return  student;
-//
-//        }
-//                      throw  new RuntimeException("Invalid Credentials");
-//        }
-//
-//
-//}
-    public Object Login(UserLoginRequest request) {
+    public String login(UserLoginRequest request) {
         String id = request.getIdentifier();
         String password = request.getPassword();
 
-        System.out.println("Trying login for ID: " + id);
-
+        // Check teacher by email or teacherId
         Teacher teacher = teacherRepository.findByEmail(id)
                 .orElseGet(() -> teacherRepository.findByteacherId(id).orElse(null));
-        if (teacher != null) {
-            System.out.println("Found teacher: " + teacher.getEmail());
-            if (teacher.getpassword().equals(password)) {
-                teacher.setpassword(null);
-                return teacher;
-            } else {
-                System.out.println("Password mismatch for teacher");
-            }
-        } else {
-            System.out.println("Teacher not found");
+
+        if (teacher != null && teacher.getpassword().equals(password)) {
+            return jwtService.generateToken(teacher.getEmail());
         }
 
+        // Check student by email or studentGuid
         Student student = studentRepository.findByEmail(id)
                 .orElseGet(() -> studentRepository.findBystudentGuid(id).orElse(null));
-        if (student != null) {
-            System.out.println("Found student: " + student.getEmail());
-            if (student.getPassword().equals(password)) {
-                student.setPassword(null);
-                return student;
-            } else {
-                System.out.println("Password mismatch for student");
-            }
-        } else {
-            System.out.println("Student not found");
+
+        if (student != null && student.getPassword().equals(password)) {
+            return jwtService.generateToken(student.getEmail());
         }
 
-        throw new RuntimeException("Invalid Credentials");
+        throw new RuntimeException("Invalid credentials");
     }
 }
-
