@@ -1,7 +1,9 @@
 package Eduverse_backend.Mvp.translation.controller;
 
+import Eduverse_backend.Mvp.translation.model.Comment;
 import Eduverse_backend.Mvp.translation.model.Teacher;
 import Eduverse_backend.Mvp.translation.model.VideoMetadata;
+import Eduverse_backend.Mvp.translation.repository.CommentRepository;
 import Eduverse_backend.Mvp.translation.repository.TeacherRepository;
 import Eduverse_backend.Mvp.translation.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,8 @@ public class StudentVideoController {
     private VideoRepository videoRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private CommentRepository commentRepo;
 
     @GetMapping("/videos/today")
     public ResponseEntity<?> getTodayVideos(
@@ -52,5 +58,18 @@ public class StudentVideoController {
            response.put("translations", List.of("English" ,"Hindi" ,"Punjabi"));
            response.put("comments" , List.of());
            return  ResponseEntity.ok(response);
+       }
+       @PostMapping("/comments")
+    public  ResponseEntity<?> addcomment (@RequestBody Comment comment , Principal principal){
+        comment.setCommenterEmail(principal.getName());
+        comment.setTimestap(LocalDateTime.now());
+        commentRepo.save(comment);
+        return ResponseEntity.ok("Comment added successfuly");
+       }
+
+       @GetMapping("/comments/{videoId}")
+    public  ResponseEntity<List<Comment>> getComments(@PathVariable String videoId){
+        List<Comment> comments = commentRepo.findByVideoIdOrderByTimestampDesc(videoId);
+        return ResponseEntity.ok(comments);
        }
 }
