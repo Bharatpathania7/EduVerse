@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface VideoRepository extends MongoRepository<VideoMetadata , String> {
@@ -23,5 +24,7 @@ public interface VideoRepository extends MongoRepository<VideoMetadata , String>
 
     // ✅ (Optional) Filter by class and status
     Page<VideoMetadata> findByClassInfoAndStatus(String classInfo, String status, Pageable pageable);
+
+    Page<VideoMetadata> findByUploadDate(LocalDate uploadDate , Pageable pageable);
 
 }
