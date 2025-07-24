@@ -26,5 +26,11 @@ public interface VideoRepository extends MongoRepository<VideoMetadata , String>
     Page<VideoMetadata> findByClassInfoAndStatus(String classInfo, String status, Pageable pageable);
 
     Page<VideoMetadata> findByUploadDate(LocalDate uploadDate , Pageable pageable);
+    Page<VideoMetadata> findByTitleContainingIgnoreCaseAndStatus(String title, String status, Pageable pageable);
+    Page<VideoMetadata> findByTagsInAndStatus(List<String> tags, String status, Pageable pageable);
+    Page<VideoMetadata> findByUploadedByInAndStatus(List<String> uploadedBy, String status, Pageable pageable);
+    Page<VideoMetadata> findBySubjectAndStatus(String subject, String status, Pageable pageable);
+    Page<VideoMetadata> findByUploadDateAndStatus(LocalDate uploadDate, String status, Pageable pageable);
+
 
 }

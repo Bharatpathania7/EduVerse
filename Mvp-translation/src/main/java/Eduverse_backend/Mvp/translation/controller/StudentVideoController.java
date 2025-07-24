@@ -51,12 +51,13 @@ public class StudentVideoController {
            VideoMetadata video = VideoOpt.get();
 
            Optional<Teacher> teacherOpt = teacherRepository.findByEmail(video.getUploadedBy());
+           List<Comment> comments = commentRepo.findByVideoIdOrderByTimestampDesc(id); // ✅ Real comments
 
            Map<String,Object> response = new HashMap<>();
            response.put("Video" , video);
            response.put("teacher" , teacherOpt.orElse(null));
            response.put("translations", List.of("English" ,"Hindi" ,"Punjabi"));
-           response.put("comments" , List.of());
+           response.put("comments" , comments);
            return  ResponseEntity.ok(response);
        }
        @PostMapping("/comments")
@@ -72,4 +73,73 @@ public class StudentVideoController {
         List<Comment> comments = commentRepo.findByVideoIdOrderByTimestampDesc(videoId);
         return ResponseEntity.ok(comments);
        }
+       @GetMapping("/videos/search/title")
+    public ResponseEntity<?> searchByTitle(
+            @RequestParam String keyword,
+            @RequestParam (defaultValue = "0") int page,
+            @RequestParam (defaultValue = "10") int size
+       ){
+        Pageable pageable = PageRequest.of(page,size);
+        Page<VideoMetadata > videos = videoRepository.findByTitleContainingIgnoreCaseAndStatus( keyword , "uploaded" , pageable);
+        return ResponseEntity.ok(videos);
+
+       }
+       @GetMapping("Videos/search/tags")
+    public  ResponseEntity<?> searchByTags(
+            @RequestParam List<String> tags,
+            @RequestParam (defaultValue = "0") int page ,
+            @RequestParam (defaultValue = "10") int size
+       ){
+        Pageable pageable = PageRequest.of(page , size );
+        Page<VideoMetadata> videos = videoRepository.findByTagsInAndStatus(tags ,"uploaded" ,pageable );
+        return  ResponseEntity.ok(videos);
+       }
+    @GetMapping("/videos/search/teacher")
+    public ResponseEntity<?> searchByTeacherName(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // 🔍 Step 1: Find all teachers with matching name
+        List<Teacher> matchingTeachers = teacherRepository.findByNameContainingIgnoreCase(name);
+
+        // 🔁 Step 2: Get their emails
+        List<String> teacherEmails = matchingTeachers.stream()
+                .map(Teacher::getEmail)
+                .toList();
+
+        // ⚠️ Check if no teachers matched
+        if (teacherEmails.isEmpty()) {
+            return ResponseEntity.ok(Page.empty()); // Return empty page response
+        }
+
+        // 📦 Step 3: Fetch videos uploaded by matching teachers with status "uploaded"
+        Pageable pageable = PageRequest.of(page, size);
+        Page<VideoMetadata> videos = videoRepository.findByUploadedByInAndStatus(teacherEmails, "uploaded", pageable);
+
+        return ResponseEntity.ok(videos);
+    }
+
+    @GetMapping("/videos/filter/subject")
+    public ResponseEntity<?> filterBySubject(
+            @RequestParam String subject,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<VideoMetadata> videos = videoRepository.findBySubjectAndStatus(subject, "uploaded", pageable);
+        return ResponseEntity.ok(videos);
+    }
+    @GetMapping("/videos/filter/date")
+    public ResponseEntity<?> filterByDate(
+            @RequestParam String date, // in format: yyyy-MM-dd
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        LocalDate uploadDate = LocalDate.parse(date);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<VideoMetadata> videos = videoRepository.findByUploadDateAndStatus(uploadDate, "uploaded", pageable);
+        return ResponseEntity.ok(videos);
+    }
+
 }
