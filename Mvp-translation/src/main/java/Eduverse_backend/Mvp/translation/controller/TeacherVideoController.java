@@ -82,6 +82,7 @@ import Eduverse_backend.Mvp.translation.repository.VideoRepository;
 import Eduverse_backend.Mvp.translation.service.S3Service;
 
 
+import Eduverse_backend.Mvp.translation.service.TranslationPipelineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
@@ -97,6 +98,7 @@ public class TeacherVideoController {
 
     @Autowired private S3Service s3Service;
     @Autowired private VideoRepository videoRepo;
+    @Autowired private TranslationPipelineService translationPipelineService;
 
     // 1️⃣ Generate pre-signed S3 upload URL
     @GetMapping("/s3/upload-url")
@@ -122,6 +124,7 @@ public class TeacherVideoController {
         metadata.setUploadDate(LocalDate.now());
         metadata.setStatus("uploaded");
         videoRepo.save(metadata);
+        translationPipelineService.runTranslationPipeline(metadata.getS3Url(), metadata.getId()); //  automatically kick off async translation  in background
         return ResponseEntity.ok("Metadata saved successfully");
     }
 
